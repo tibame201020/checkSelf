@@ -6,6 +6,9 @@ import com.custom.checkSelf.model.Period;
 import com.custom.checkSelf.model.ViewGoal;
 import com.custom.checkSelf.repo.GoalRepo;
 import com.custom.checkSelf.service.impl.GoalServiceImpl;
+import com.custom.checkSelf.util.DateUtil;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -20,6 +23,7 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class GoalServiceTest {
+    private final Log log = LogFactory.getLog(this.getClass());
     @Mock
     private GoalRepo goalRepo;
     @InjectMocks
@@ -30,13 +34,13 @@ class GoalServiceTest {
     void generateViewGoal() {
         int year = 2023;
         int month = 8;
-        String goalName = "a";
-        String goalDescription = "as";
-        Period goalPeriod = Period.WEEK;
+        String goalName = "testTargetName";
+        String goalDescription = "testTargetDescription";
+        Period goalPeriod = Period.MONTH;
         boolean goalIsDone = false;
 
         ViewGoal result = mockViewGoal(year, month, goalName, goalDescription, goalPeriod, goalIsDone);
-        int remainDays = 30;
+        int remainDays = DateUtil.getDaysOfMonth(year, month) - 1;
 
         when(goalRepo.findAll()).thenReturn(mockFakeGoalAll(goalName, goalDescription, goalPeriod, goalIsDone));
 

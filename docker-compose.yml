@@ -1,0 +1,29 @@
+version: '3.8'
+services:
+
+  app-backend:
+    image: check-self:1.0.0
+    restart: always
+    environment:
+      - DB_HOST=app-mongodb
+      - TZ=Asia/Taipei
+    ports:
+      - 8099:8099
+    networks:
+      - front2back
+      - back2db
+
+  app-mongodb:
+    image: mongo:7.0.1-rc0
+    ports:
+      - 27017:27017
+    volumes:
+      - mongodb-data:/data/db
+    networks:
+      - back2db
+networks:
+  front2back:
+  back2db:
+
+volumes:
+  mongodb-data:

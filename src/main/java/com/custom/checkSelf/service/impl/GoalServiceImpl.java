@@ -7,7 +7,6 @@ import com.custom.checkSelf.service.GoalService;
 import com.custom.checkSelf.util.DateUtil;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
 
@@ -22,14 +21,14 @@ public class GoalServiceImpl implements GoalService {
 
     @Override
     public Flux<ViewGoal> generateViewGoal(int year, int month) {
-        Flux<Goal> goalFlux = goalRepo.findAll().log();
-        Flux<LocalDate> localDateFlux = DateUtil.getAllDaysInMonth(year, month).log();
+        Flux<Goal> goalFlux = goalRepo.findAll();
+        Flux<LocalDate> localDateFlux = DateUtil.getAllDaysInMonth(year, month);
 
-        return goalFlux.flatMap(goal -> localDateFlux.flatMap(localDate -> {
+        return goalFlux.flatMap(goal -> localDateFlux.map(localDate -> {
             ViewGoal viewGoal = new ViewGoal();
             viewGoal.setGoal(goal);
             viewGoal.setDate(localDate);
-            return Mono.just(viewGoal);
+            return viewGoal;
         }));
     }
 }
