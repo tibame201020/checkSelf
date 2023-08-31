@@ -18,18 +18,8 @@ public class DateUtil {
      * @return Flux<LocalDate>
      */
     public static Flux<LocalDate> getAllDaysInMonth(int year, int month) {
-        return Flux.range(1, getDaysOfMonth(year, month))
+        return Flux.range(1, LocalDate.of(year, month, 1).lengthOfMonth())
                 .map(day -> LocalDate.of(year, month, day));
     }
 
-    /**
-     * 取得當月份天數
-     *
-     * @param year
-     * @param month
-     * @return int 天數
-     */
-    public static int getDaysOfMonth(int year, int month) {
-        return LocalDate.of(year, month, 1).lengthOfMonth();
-    }
 }

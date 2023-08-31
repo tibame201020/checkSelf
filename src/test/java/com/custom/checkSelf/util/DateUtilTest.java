@@ -7,8 +7,7 @@ import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 import java.time.LocalDate;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.util.random.RandomGenerator;
 
 
 class DateUtilTest {
@@ -17,10 +16,11 @@ class DateUtilTest {
 
     @Test
     void getAllDaysInMonth() {
-        int year = 2023;
-        int month = 6;
-        LocalDate firstDayOfMonth = getFirstDayOfMonth(year, month);
-        int remainDays = DateUtil.getDaysOfMonth(year, month) - 1;
+        int year = RandomGenerator.getDefault().nextInt(1991, 2023);
+        int month = RandomGenerator.getDefault().nextInt(1, 12);
+
+        LocalDate firstDayOfMonth = LocalDate.of(year, month, 1);
+        int remainDays = LocalDate.of(year, month, 1).lengthOfMonth() - 1;
 
         Flux<LocalDate> allDaysInMonth = DateUtil.getAllDaysInMonth(year, month).log();
 
@@ -30,21 +30,5 @@ class DateUtilTest {
                 .verifyComplete();
     }
 
-    @Test
-    void getDaysOfMonth() {
-        int year = 2023;
-        int month = 6;
-        int expect = 30;
 
-        int result = DateUtil.getDaysOfMonth(year, month);
-
-        log.info("expect: " + expect);
-        log.info("result: " + result);
-
-        assertEquals(expect, result);
-    }
-
-    private LocalDate getFirstDayOfMonth(int year, int month) {
-        return LocalDate.of(year, month, 1);
-    }
 }

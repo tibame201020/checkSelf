@@ -6,7 +6,7 @@ import com.custom.checkSelf.model.Period;
 import com.custom.checkSelf.model.ViewGoal;
 import com.custom.checkSelf.repo.GoalRepo;
 import com.custom.checkSelf.service.impl.GoalServiceImpl;
-import com.custom.checkSelf.util.DateUtil;
+import net.bytebuddy.utility.RandomString;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.junit.jupiter.api.Test;
@@ -18,6 +18,8 @@ import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.random.RandomGenerator;
 
 import static org.mockito.Mockito.when;
 
@@ -32,17 +34,15 @@ class GoalServiceTest {
 
     @Test
     void generateViewGoal() {
-        int year = 2023;
-        int month = 8;
-        String goalName = "testTargetName";
-        String goalDescription = "testTargetDescription";
-        Period goalPeriod = Period.MONTH;
-        boolean goalIsDone = false;
+        Goal goal = generateRandomGoal();
+        Goal goal_II = generateRandomGoal();
 
-        ViewGoal result = mockViewGoal(year, month, goalName, goalDescription, goalPeriod, goalIsDone);
-        int remainDays = DateUtil.getDaysOfMonth(year, month) - 1;
+        when(goalRepo.findAll()).thenReturn(Flux.just(goal, goal_II));
 
-        when(goalRepo.findAll()).thenReturn(mockFakeGoalAll(goalName, goalDescription, goalPeriod, goalIsDone));
+        int year = RandomGenerator.getDefault().nextInt(1991, 2023);
+        int month = RandomGenerator.getDefault().nextInt(1, 12);
+        ViewGoal result = mockViewGoal(year, month, List.of(goal, goal_II));
+        int remainDays = LocalDate.of(year, month, 1).lengthOfMonth() - 1;
 
 
         Flux<ViewGoal> viewGoalFlux = goalService.generateViewGoal(year, month).log();
@@ -53,29 +53,27 @@ class GoalServiceTest {
                 .verifyComplete();
     }
 
-    private Flux<Goal> mockFakeGoalAll(String goalName, String goalDescription, Period goalPeriod, boolean goalIsDone) {
-        return Flux.just(
-                generateGoal(goalName, goalDescription, goalPeriod, goalIsDone)
-        );
-    }
-
-    private ViewGoal mockViewGoal(int year, int month, String goalName, String goalDescription, Period goalPeriod, boolean goalIsDone) {
+    private ViewGoal mockViewGoal(int year, int month, List<Goal> goalList) {
         ViewGoal viewGoal = new ViewGoal();
+        viewGoal.setGoalList(goalList);
         viewGoal.setDate(LocalDate.of(year, month, 1));
-        Goal goal = generateGoal(goalName, goalDescription, goalPeriod, goalIsDone);
-        viewGoal.setGoal(goal);
+
         return viewGoal;
     }
 
-    private Goal generateGoal(String name, String description, Period period, boolean isDone) {
+    private Goal generateRandomGoal() {
         CheckList checkList = new CheckList();
-        checkList.setName(name);
-        checkList.setDescription(description);
+        checkList.setName(RandomString.make());
+        checkList.setDescription(RandomString.make());
+
         Goal goal = new Goal();
         goal.setCheckList(checkList);
-        goal.setPeriod(period);
-        goal.setDone(isDone);
+
+        int pick = RandomGenerator.getDefault().nextInt(Period.values().length);
+        goal.setPeriod(Period.values()[pick]);
+        goal.setDone(RandomGenerator.getDefault().nextBoolean());
 
         return goal;
     }
+
 }

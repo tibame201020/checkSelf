@@ -24,11 +24,14 @@ public class GoalServiceImpl implements GoalService {
         Flux<Goal> goalFlux = goalRepo.findAll();
         Flux<LocalDate> localDateFlux = DateUtil.getAllDaysInMonth(year, month);
 
-        return goalFlux.flatMap(goal -> localDateFlux.map(localDate -> {
-            ViewGoal viewGoal = new ViewGoal();
-            viewGoal.setGoal(goal);
-            viewGoal.setDate(localDate);
-            return viewGoal;
-        }));
+        return localDateFlux.flatMap(localDate -> goalFlux
+                .buffer()
+                .map(goalList -> {
+                            ViewGoal viewGoal = new ViewGoal();
+                            viewGoal.setGoalList(goalList);
+                            viewGoal.setDate(localDate);
+                            return viewGoal;
+                        }
+                ));
     }
 }
